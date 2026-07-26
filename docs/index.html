@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Returning Customer Field Report — Northwind 1998</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0F131A;
+    --panel:#161C26;
+    --panel-2:#1B222E;
+    --border:#262E3C;
+    --text:#E9ECF1;
+    --muted:#8993A6;
+    --faint:#5D6678;
+    --amber:#E4A24D;
+    --amber-dim:#E4A24D33;
+    --teal:#4FB6A8;
+    --teal-dim:#4FB6A833;
+    --rose:#C1636B;
+    --rose-dim:#C1636B33;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:64px 28px 100px;}
+
+  /* ===== Header ===== */
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;}
+  h1.title{
+    font-family:'IBM Plex Serif', serif;
+    font-weight:500;
+    font-size:clamp(28px,4vw,42px);
+    line-height:1.15;
+    margin:0 0 14px;
+    letter-spacing:-.01em;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:15.5px;
+    line-height:1.65;
+    max-width:640px;
+    margin:0 0 40px;
+  }
+
+  /* ===== Hero stat row ===== */
+  .hero-row{
+    display:flex; gap:0;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    margin-bottom:56px;
+  }
+  .hero-cell{
+    flex:1; padding:26px 22px; position:relative;
+  }
+  .hero-cell + .hero-cell{border-left:1px solid var(--border);}
+  .hero-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:38px; font-weight:600;
+    color:var(--text);
+    line-height:1;
+  }
+  .hero-num span.accent{color:var(--amber);}
+  .hero-num span.accent2{color:var(--teal);}
+  .hero-label{
+    margin-top:8px; font-size:12.5px; color:var(--muted); line-height:1.5;
+  }
+
+  /* ===== Section spine ===== */
+  .section{
+    display:grid;
+    grid-template-columns:56px 1fr;
+    gap:0 24px;
+    margin-bottom:8px;
+  }
+  .spine{
+    display:flex; flex-direction:column; align-items:center;
+    position:relative;
+  }
+  .spine .tab{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color:var(--bg); background:var(--amber);
+    width:30px;height:30px;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:600; flex-shrink:0;
+  }
+  .spine .line{
+    flex:1; width:1px; background:var(--border); margin-top:6px;
+  }
+  .section:last-of-type .spine .line{display:none;}
+  .section-body{padding-bottom:52px;}
+  .section-head{margin-bottom:6px;}
+  .section-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint);
+  }
+  h2.section-title{
+    font-family:'IBM Plex Serif', serif;
+    font-weight:500; font-size:22px; margin:4px 0 10px; color:var(--text);
+  }
+  .section-copy{color:var(--muted); font-size:14.5px; line-height:1.7; max-width:600px; margin-bottom:22px;}
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:22px 22px 14px;
+  }
+  .panel-note{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:14px; padding-top:14px; border-top:1px solid var(--border);
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--muted);
+  }
+  .panel-note b{color:var(--text); font-weight:600;}
+  canvas{max-height:230px;}
+
+  /* callout chip row */
+  .chips{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;}
+  .chip{
+    font-family:'IBM Plex Mono', monospace; font-size:12px;
+    padding:6px 10px; border-radius:20px; border:1px solid var(--border);
+    color:var(--muted);
+  }
+  .chip.on{color:var(--teal); border-color:var(--teal-dim); background:var(--teal-dim);}
+  .chip.off{color:var(--rose); border-color:var(--rose-dim); background:var(--rose-dim);}
+
+  /* ranking list for category section */
+  .rank-list{display:flex; flex-direction:column; gap:12px;}
+  .rank-row{display:grid; grid-template-columns:26px 130px 1fr; align-items:center; gap:14px;}
+  .rank-idx{font-family:'IBM Plex Mono',monospace; color:var(--faint); font-size:13px;}
+  .rank-name{font-size:14px; color:var(--text);}
+  .rank-bar-track{height:10px; background:var(--panel-2); border-radius:6px; overflow:hidden;}
+  .rank-bar-fill{height:100%; border-radius:6px;}
+
+  /* footer takeaway */
+  .takeaway{
+    margin-top:20px;
+    border:1px solid var(--border);
+    border-left:3px solid var(--amber);
+    background:var(--panel);
+    border-radius:8px;
+    padding:24px 26px;
+  }
+  .takeaway .kicker{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--amber); margin-bottom:10px;
+  }
+  .takeaway p{
+    font-family:'IBM Plex Serif', serif; font-size:17px; line-height:1.55; color:var(--text); margin:0;
+  }
+  .footnote{
+    margin-top:40px; color:var(--faint); font-size:12px; font-family:'IBM Plex Mono',monospace; line-height:1.7;
+  }
+
+  @media (max-width:600px){
+    .section{grid-template-columns:36px 1fr; gap:0 14px;}
+    .spine .tab{width:26px;height:26px;font-size:11px;}
+    .hero-row{flex-wrap:wrap;}
+    .hero-cell{flex:1 1 50%; border-left:none !important; border-top:1px solid var(--border);}
+    .hero-cell:nth-child(1),.hero-cell:nth-child(2){border-top:none;}
+    .rank-row{grid-template-columns:20px 100px 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Field Report · Northwind 1998</div>
+  <h1 class="title">Returning customers didn't just come back — most of them stayed.</h1>
+  <p class="subtitle">Of 81 customers active in 1998, 13 went quiet for six months or more and then placed a new order. This report tracks what happened after they came back: how strong the comeback was, whether it lasted, and what they bought.</p>
+
+  <div class="hero-row">
+    <div class="hero-cell">
+      <div class="hero-num">81</div>
+      <div class="hero-label">Active customers, 1998 baseline</div>
+    </div>
+    <div class="hero-cell">
+      <div class="hero-num"><span class="accent">13</span></div>
+      <div class="hero-label">Returned after 6+ months inactive</div>
+    </div>
+    <div class="hero-cell">
+      <div class="hero-num"><span class="accent2">76.9%</span></div>
+      <div class="hero-label">Kept ordering after the comeback</div>
+    </div>
+    <div class="hero-cell">
+      <div class="hero-num">$1,619.67</div>
+      <div class="hero-label">Avg. first-order value, 1998</div>
+    </div>
+  </div>
+
+  <!-- 01 — Funnel -->
+  <div class="section">
+    <div class="spine"><div class="tab">01</div><div class="line"></div></div>
+    <div class="section-body">
+      <div class="section-head">
+        <div class="section-eyebrow">Baseline → Cohort</div>
+        <h2 class="section-title">From the full customer base to a real returning cohort</h2>
+      </div>
+      <p class="section-copy">Strict "high‑value" thresholds (lifetime spend over $10,000, or average order over $1,500) eliminated every candidate — so this report tracks the full returning cohort instead of an empty strict segment.</p>
+      <div class="panel">
+        <canvas id="funnelChart"></canvas>
+        <div class="panel-note">
+          <span>Strict high-value qualifiers</span>
+          <span><b>0 of 13</b> — thresholds retained as a legacy flag only</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 — Comeback strength -->
+  <div class="section">
+    <div class="spine"><div class="tab">02</div><div class="line"></div></div>
+    <div class="section-body">
+      <div class="section-head">
+        <div class="section-eyebrow">Comeback strength</div>
+        <h2 class="section-title">Most comebacks were cautious, not bold</h2>
+      </div>
+      <p class="section-copy">Comparing each customer's first 1998 order against the $1,619.67 average first-order value: most returned with a smaller, trial-sized purchase rather than a big re-entry order.</p>
+      <div class="panel">
+        <canvas id="comebackChart"></canvas>
+        <div class="chips">
+          <span class="chip on">● Above average — 4 customers</span>
+          <span class="chip off">● Below average — 9 customers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 — Post-return engagement -->
+  <div class="section">
+    <div class="spine"><div class="tab">03</div><div class="line"></div></div>
+    <div class="section-body">
+      <div class="section-head">
+        <div class="section-eyebrow">What happened next</div>
+        <h2 class="section-title">The comeback order mattered less than what followed it</h2>
+      </div>
+      <p class="section-copy">Counting each customer's additional 1998 orders after the comeback: over three-quarters went on to order at least twice more — this is the strongest signal in the whole dataset.</p>
+      <div class="panel">
+        <canvas id="engagementChart"></canvas>
+        <div class="panel-note">
+          <span>Sustained re-engagement (2+ follow-up orders)</span>
+          <span><b>10 of 13 customers</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 — Country benchmark -->
+  <div class="section">
+    <div class="spine"><div class="tab">04</div><div class="line"></div></div>
+    <div class="section-body">
+      <div class="section-head">
+        <div class="section-eyebrow">Country benchmark</div>
+        <h2 class="section-title">Judged against local peers, not a flat global bar</h2>
+      </div>
+      <p class="section-copy">Each returning customer's total 1998 sales is compared to the average of other customers from the same country, controlling for regional market size. Germany, Brazil, and the USA account for over half of the cohort.</p>
+      <div class="panel">
+        <canvas id="countryChart"></canvas>
+        <div class="panel-note">
+          <span>Outperformed their own country's average</span>
+          <span><b>5 of 13 customers</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 — Category behavior -->
+  <div class="section">
+    <div class="spine"><div class="tab">05</div></div>
+    <div class="section-body">
+      <div class="section-head">
+        <div class="section-eyebrow">What they bought</div>
+        <h2 class="section-title">Reactivation runs through the pantry, not the catalog</h2>
+      </div>
+      <p class="section-copy">Ranked by how concentrated the returning cohort's purchases were, relative to the rest of the catalog. Standard (non-returning) customers spread their purchases more evenly across categories by comparison — <i>ranking is qualitative; exact revenue split by category wasn't computed.</i></p>
+      <div class="panel">
+        <div class="rank-list">
+          <div class="rank-row">
+            <div class="rank-idx">01</div>
+            <div class="rank-name">Beverages</div>
+            <div class="rank-bar-track"><div class="rank-bar-fill" style="width:100%; background:var(--amber);"></div></div>
+          </div>
+          <div class="rank-row">
+            <div class="rank-idx">02</div>
+            <div class="rank-name">Dairy Products</div>
+            <div class="rank-bar-track"><div class="rank-bar-fill" style="width:72%; background:var(--teal);"></div></div>
+          </div>
+          <div class="rank-row">
+            <div class="rank-idx">02</div>
+            <div class="rank-name">Confections</div>
+            <div class="rank-bar-track"><div class="rank-bar-fill" style="width:72%; background:var(--teal);"></div></div>
+          </div>
+          <div class="rank-row">
+            <div class="rank-idx">—</div>
+            <div class="rank-name" style="color:var(--faint)">Remaining categories</div>
+            <div class="rank-bar-track"><div class="rank-bar-fill" style="width:34%; background:var(--faint);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    <div class="kicker">Final takeaway</div>
+    <p>The strongest business signal isn't whether a customer returns — it's whether they keep buying afterward. Reactivation campaigns built around staple, repeat-purchase categories like Beverages and Dairy look like the highest-leverage lever here.</p>
+  </div>
+
+  <div class="footnote">
+    Source: Northwind sample database, 1998 order activity · Returning-customer cohort, n = 13 · Compiled from project queries 01–08
+  </div>
+
+</div>
+
+<script>
+function initCharts(){
+if (typeof Chart === 'undefined') {
+  document.querySelectorAll('canvas').forEach(function(c){
+    var p = document.createElement('div');
+    p.style.cssText = 'color:#8993A6;font-family:IBM Plex Mono,monospace;font-size:12px;padding:20px;text-align:center;';
+    p.textContent = 'Chart library failed to load from CDN — check network access.';
+    c.replaceWith(p);
+  });
+  return;
+}
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.color = "#8993A6";
+Chart.defaults.font.size = 11.5;
+
+function baseGrid(){
+  return { color:"#262E3C", drawTicks:false };
+}
+
+// 01 Funnel
+new Chart(document.getElementById('funnelChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Active customers, 1998', 'Returning cohort', 'Above-avg comeback order', 'Sustained after return'],
+    datasets: [{
+      data: [81, 13, 4, 10],
+      backgroundColor: ['#2A3240','#E4A24D','#E4A24D99','#4FB6A8'],
+      borderRadius: 5,
+      barThickness: 22,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: { legend: { display:false },
+      tooltip:{ backgroundColor:'#1B222E', borderColor:'#262E3C', borderWidth:1, titleColor:'#E9ECF1', bodyColor:'#E9ECF1' } },
+    scales: {
+      x: { grid: baseGrid(), border:{display:false}, ticks:{color:'#8993A6'} },
+      y: { grid: { display:false }, border:{display:false}, ticks:{color:'#E9ECF1', font:{family:"'IBM Plex Sans', sans-serif", size:12.5}} }
+    }
+  }
+});
+
+// 02 Comeback strength
+new Chart(document.getElementById('comebackChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Above avg. first order', 'Below avg. first order'],
+    datasets: [{
+      data: [4, 9],
+      backgroundColor: ['#4FB6A8', '#2A3240'],
+      borderColor: '#161C26',
+      borderWidth: 3,
+    }]
+  },
+  options: {
+    cutout: '72%',
+    plugins: { legend:{ display:false },
+      tooltip:{ backgroundColor:'#1B222E', borderColor:'#262E3C', borderWidth:1, titleColor:'#E9ECF1', bodyColor:'#E9ECF1' } }
+  }
+});
+
+// 03 Engagement
+new Chart(document.getElementById('engagementChart'), {
+  type: 'bar',
+  data: {
+    labels: ['One-time comeback\n(0 follow-ups)', 'Limited re-engagement\n(1 follow-up)', 'Sustained re-engagement\n(2+ follow-ups)'],
+    datasets: [{
+      data: [1, 2, 10],
+      backgroundColor: ['#C1636B', '#E4A24D', '#4FB6A8'],
+      borderRadius: 5,
+      barThickness: 30,
+    }]
+  },
+  options: {
+    plugins: { legend:{ display:false },
+      tooltip:{ backgroundColor:'#1B222E', borderColor:'#262E3C', borderWidth:1, titleColor:'#E9ECF1', bodyColor:'#E9ECF1' } },
+    scales: {
+      x: { grid:{ display:false }, border:{display:false}, ticks:{color:'#E9ECF1', font:{family:"'IBM Plex Sans', sans-serif", size:11.5}} },
+      y: { grid: baseGrid(), border:{display:false}, ticks:{stepSize:2} }
+    }
+  }
+});
+
+// 04 Country
+new Chart(document.getElementById('countryChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Germany', 'Brazil', 'USA', 'Other countries'],
+    datasets: [{
+      data: [3, 2, 2, 6],
+      backgroundColor: ['#E4A24D','#E4A24D','#E4A24D','#2A3240'],
+      borderRadius: 5,
+      barThickness: 22,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: { legend:{ display:false },
+      tooltip:{ backgroundColor:'#1B222E', borderColor:'#262E3C', borderWidth:1, titleColor:'#E9ECF1', bodyColor:'#E9ECF1' } },
+    scales: {
+      x: { grid: baseGrid(), border:{display:false}, ticks:{color:'#8993A6', stepSize:1} },
+      y: { grid:{ display:false }, border:{display:false}, ticks:{color:'#E9ECF1', font:{family:"'IBM Plex Sans', sans-serif", size:12.5}} }
+    }
+  }
+});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCharts);
+} else {
+  initCharts();
+}
+</script>
+</body>
+</html>
