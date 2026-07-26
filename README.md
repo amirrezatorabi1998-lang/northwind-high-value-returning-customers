@@ -2,6 +2,10 @@
 
 Identifying which customers came back in 1998 after a long inactive period, and whether those comebacks were genuinely valuable to the business.
 
+[![View Report](https://img.shields.io/badge/View-Live%20Report-E4A24D?style=for-the-badge)](https://amirrezatorabi1998-lang.github.io/northwind-high-value-returning-customers/)
+
+## 📊 [View Live Report](https://amirrezatorabi1998-lang.github.io/northwind-high-value-returning-customers/)
+
 ## Overview
 
 This project analyzes the Northwind sample database to identify customers who returned in 1998 after at least 6 months of inactivity and to evaluate the quality of those returns.
